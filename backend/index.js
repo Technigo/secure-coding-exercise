@@ -9,7 +9,7 @@ const app = express()
 app.use(cors())
 app.use(bodyParser.json())
 
-const mongoUrl = process.env.MONGO_URL || "mongodb://localhost/messages"
+const mongoUrl = process.env.MONGO_URL || "mongodb://localhost/secure-coding-exercise-messages"
 mongoose.connect(mongoUrl)
 
 mongoose.connection.once("open", () => {
@@ -26,8 +26,7 @@ const Message = mongoose.model('Message', {
   message: {
     type: String,
     required: true,
-    minlength: 5,
-    maxlength: 140
+    minlength: 5
   },
   hearts: {
     type: Number,
@@ -49,7 +48,7 @@ app.get('/messages', async (req, res) => {
 })
 
 app.post('/messages', async (req, res) => {
-  const message = new Message({ message: req.body.message, hearts: 0 })
+  const message = new Message(req.body)
 
   try {
     const saved = await message.save()

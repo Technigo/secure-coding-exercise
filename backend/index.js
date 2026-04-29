@@ -1,4 +1,5 @@
-// require('dotenv').config()
+import "dotenv/config"
+import rateLimit from "express-rate-limit"
 import cors from "cors"
 import express from "express"
 import mongoose from "mongoose"
@@ -8,6 +9,14 @@ import { Message } from "./models/Message.js"
 import { User } from "./models/User.js"
 import { authenticateUser } from "./middleware/auth.js"
 import listEndpoints from "express-list-endpoints"
+
+if (!process.env.JWT_SECRET) throw new Error("JWT_SECRET is not set in .env")
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { success: false, message: "Too many attempts, please try again later" }
+})
 
 const PORT = process.env.PORT || '3000'
 const app = express()
@@ -30,7 +39,7 @@ app.get('/', async (req, res) => {
 })
 
 // register
-app.post("/register", async (req, res) => {
+app.post("/register", authLimiter, async (req, res) => {
   try {
     const { email, password } = req.body
 
@@ -51,13 +60,19 @@ app.post("/register", async (req, res) => {
 
     await user.save()
 
+    const accessToken = jwt.sign(
+      { userId: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "2h" }
+    )
+
     res.status(200).json({
       success: true,
       message: "User created successfully",
       response: {
         email: user.email,
         id: user._id,
-        accessToken: user.accessToken,
+        accessToken,
       },
     })
   } catch (error) {
@@ -70,19 +85,24 @@ app.post("/register", async (req, res) => {
 })
 
 // login
-app.post("/login", async (req, res) => {
+app.post("/login", authLimiter, async (req, res) => {
   try {
     const { email, password } = req.body
     const user = await User.findOne({ email: email.toLowerCase() })
 
     if (user && bcrypt.compareSync(password, user.password)) {
+      const accessToken = jwt.sign(
+        { userId: user._id, email: user.email },
+        process.env.JWT_SECRET,
+        { expiresIn: "2h" }
+      )
       res.json({
         success: true,
         message: "Logged in successfully",
         response: {
           email: user.email,
           id: user._id,
-          accessToken: user.accessToken
+          accessToken,
         },
       })
     } else {

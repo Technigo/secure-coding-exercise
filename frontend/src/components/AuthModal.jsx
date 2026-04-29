@@ -26,7 +26,6 @@ function AuthModal({ mode, onClose, onSuccess }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Something went wrong");
 
-      localStorage.setItem("user", JSON.stringify(data));
       onSuccess(data);
     } catch (err) {
       setError(err.message);

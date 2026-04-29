@@ -1,20 +1,15 @@
-import { User } from "../models/User.js"
+import jwt from "jsonwebtoken"
 
-export const authenticateUser = async (req, res, next) => {
+export const authenticateUser = (req, res, next) => {
   try {
-    const user = await User.findOne({
-      accessToken: req.header('Authorization').replace("Bearer ", ""),
-    })
-    if (user) {
-      req.user = user
-      next()
-    } else {
-      res.status(401).json({
-        message: "Authentication missing / invalid",
-        loggedOut: true
-      })
+    const token = req.header("Authorization")?.replace("Bearer ", "")
+    if (!token) {
+      return res.status(401).json({ message: "Authentication missing" })
     }
+    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+    req.user = { _id: decoded.userId, email: decoded.email }
+    next()
   } catch (error) {
-    res.status(500).json({ message: "Internal server error", error: error.message })
+    res.status(401).json({ message: "Authentication missing / invalid" })
   }
 }

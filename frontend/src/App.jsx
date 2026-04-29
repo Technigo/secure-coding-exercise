@@ -8,10 +8,7 @@ export const App = () => {
   // Here we set our states for App.js:
   const [loading, setLoading] = useState(false) // Initial state is false, no loading
   const [messageList, setMessageList] = useState([]) // Initial state is an empty array
-  const [user, setUser] = useState(() => {
-    const stored = localStorage.getItem("user")
-    return stored ? JSON.parse(stored) : null
-  })
+  const [user, setUser] = useState(null)
   const [modal, setModal] = useState(null)
   const [error, setError] = useState(null)
 
@@ -63,7 +60,7 @@ export const App = () => {
           <div className="user-info">
             <span>{user.response.email}</span>
             <button
-              onClick={() => { localStorage.removeItem("user"); setUser(null); }}
+              onClick={() => setUser(null)}
               className="auth-button"
             >
               Logout

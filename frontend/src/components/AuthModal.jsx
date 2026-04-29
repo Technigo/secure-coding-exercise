@@ -1,6 +1,5 @@
 import { useState } from "react";
-
-const BASE_URL = "http://localhost:3000";
+import { BASE_URL } from "../api";
 
 function AuthModal({ mode, onClose, onSuccess }) {
   const [email, setEmail] = useState("");
@@ -24,7 +23,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Something went wrong");
+      if (!res.ok) throw new Error(data.message || "Something went wrong");
 
       onSuccess(data);
     } catch (err) {
@@ -57,9 +56,15 @@ function AuthModal({ mode, onClose, onSuccess }) {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          minLength={6}
+          minLength={mode === "register" ? 8 : undefined}
           name="password"
+          autoComplete={mode === "register" ? "new-password" : "current-password"}
         />
+        {mode === "register" && (
+          <p style={{ fontSize: "11px", color: "grey", margin: "0 0 8px 0" }}>
+            Min 8 characters, with uppercase, number, and special character
+          </p>
+        )}
 
         {error && <p className="error">{error}</p>}
 

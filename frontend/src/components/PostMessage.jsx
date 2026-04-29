@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { BASE_URL } from "../api"
 
 export const PostMessage = ({ newMessage, fetchPosts, user }) => {
   const [newPost, setNewPost] = useState("") // Initial state is an empty string
@@ -35,7 +36,7 @@ export const PostMessage = ({ newMessage, fetchPosts, user }) => {
       }
 
       // console.log('options:', options)
-      fetch("http://localhost:3000/messages", options)
+      fetch(`${BASE_URL}/messages`, options)
         .then((response) => response.json())
         .then((data) => {
           newMessage(data)

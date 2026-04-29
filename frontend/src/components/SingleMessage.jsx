@@ -1,9 +1,12 @@
 import { useState } from "react"
+import { BASE_URL } from "../api"
 import { formatDistance } from "date-fns"
 
 export const SingleMessage = ({ singleMessage, fetchPosts, user }) => {
   const [numLikes, setNumLikes] = useState(singleMessage.hearts)
-  const [liked, setLiked] = useState(false)
+  const [liked, setLiked] = useState(
+    user ? singleMessage.likedBy?.includes(user.response.id) : false
+  )
   const [isEditing, setIsEditing] = useState(false)
   const [editedText, setEditedText] = useState(singleMessage.message)
   const [editError, setEditError] = useState("")
@@ -29,13 +32,13 @@ export const SingleMessage = ({ singleMessage, fetchPosts, user }) => {
     }
 
     fetch(
-      `http://localhost:3000/messages/${singleMessage._id}/like`,
+      `${BASE_URL}/messages/${singleMessage._id}/like`,
       options
     )
       .then((response) => response.json())
-      .then(() => {
-        setNumLikes(numLikes + 1)
-        setLiked(true)
+      .then((data) => {
+        setNumLikes(data.hearts)
+        setLiked(!liked)
         fetchPosts()
       })
       .catch((error) => console.log(error))
@@ -51,7 +54,7 @@ export const SingleMessage = ({ singleMessage, fetchPosts, user }) => {
       return
     }
     setEditError("")
-    fetch(`http://localhost:3000/messages/${singleMessage._id}`, {
+    fetch(`${BASE_URL}/messages/${singleMessage._id}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -68,7 +71,7 @@ export const SingleMessage = ({ singleMessage, fetchPosts, user }) => {
   }
 
   const onDelete = () => {
-    fetch(`http://localhost:3000/messages/${singleMessage._id}`, {
+    fetch(`${BASE_URL}/messages/${singleMessage._id}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${user.response.accessToken}`,

@@ -1,4 +1,5 @@
 import "dotenv/config"
+import helmet from "helmet"
 import rateLimit from "express-rate-limit"
 import cors from "cors"
 import express from "express"
@@ -20,7 +21,10 @@ const authLimiter = rateLimit({
 
 const PORT = process.env.PORT || '3000'
 const app = express()
-app.use(cors())
+app.use(helmet())
+app.use(cors({
+  origin: process.env.FRONTEND_URL || "http://localhost:5173",
+}))
 app.use(express.json())
 
 const mongoUrl = process.env.MONGO_URL || "mongodb://localhost/secure-coding-exercise-messages"
@@ -42,6 +46,13 @@ app.get('/', async (req, res) => {
 app.post("/register", authLimiter, async (req, res) => {
   try {
     const { email, password } = req.body
+
+    if (!password || password.length < 8) {
+      return res.status(400).json({ success: false, message: "Password must be at least 8 characters" })
+    }
+    if (!/[A-Z]/.test(password) || !/[0-9]/.test(password) || !/[^A-Za-z0-9]/.test(password)) {
+      return res.status(400).json({ success: false, message: "Password must contain at least one uppercase letter, one number, and one special character" })
+    }
 
     const existingUser = await User.findOne({
       email: email.toLowerCase()
@@ -76,10 +87,10 @@ app.post("/register", authLimiter, async (req, res) => {
       },
     })
   } catch (error) {
+    console.error("Register error:", error)
     res.status(400).json({
       success: false,
       message: 'Could not create user',
-      response: error,
     })
   }
 })
@@ -113,10 +124,10 @@ app.post("/login", authLimiter, async (req, res) => {
       })
     }
   } catch (error) {
+    console.error("Login error:", error)
     res.status(500).json({
       success: false,
       message: "Something went wrong",
-      response: error
     })
   }
 })
@@ -127,7 +138,8 @@ app.get('/messages', async (req, res) => {
 })
 
 app.post('/messages', authenticateUser, async (req, res) => {
-  const message = new Message({ ...req.body, user: req.user._id })
+  const { message: messageText } = req.body
+  const message = new Message({ message: messageText, user: req.user._id })
 
   try {
     const saved = await message.save()
@@ -139,10 +151,20 @@ app.post('/messages', authenticateUser, async (req, res) => {
 
 app.patch('/messages/:id/like', authenticateUser, async (req, res) => {
   try {
-    const message = await Message.findOneAndUpdate({ _id: req.params.id }, { $inc: { hearts: 1 } }, { new: true })
+    const message = await Message.findById(req.params.id)
+    if (!message) return res.status(404).json({ message: 'Message not found' })
+
+    if (message.likedBy.includes(req.user._id)) {
+      message.likedBy.pull(req.user._id)
+      message.hearts -= 1
+    } else {
+      message.likedBy.push(req.user._id)
+      message.hearts += 1
+    }
+    await message.save()
     res.json(message)
   } catch (err) {
-    res.status(400).json({ message: 'Could not save heart', errors: err.errors })
+    res.status(400).json({ message: 'Could not save heart' })
   }
 })
 

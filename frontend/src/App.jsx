@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { BASE_URL } from "./api"
 import { PostMessage } from "./components/PostMessage"
 import { MessageList } from "./components/MessageList"
 import AuthModal from "./components/AuthModal"
@@ -18,7 +19,7 @@ export const App = () => {
     // console.log(loading)
     // console.log(messageList)
     setLoading(true)
-    fetch("http://localhost:3000/messages")
+    fetch(`${BASE_URL}/messages`)
       .then((res) => res.json())
       .then((data) => setMessageList(data))
       .catch((error) => console.error(error))

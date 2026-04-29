@@ -48,6 +48,8 @@ function AuthModal({ mode, onClose, onSuccess }) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          name="email"
+          autoComplete="email"
         />
 
         <input
@@ -57,6 +59,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
           onChange={(e) => setPassword(e.target.value)}
           required
           minLength={6}
+          name="password"
         />
 
         {error && <p className="error">{error}</p>}

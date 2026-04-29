@@ -83,13 +83,18 @@ export const SingleMessage = ({ singleMessage, fetchPosts, user }) => {
       <div className="message-header">
         {isEditing ? (
           <div className="edit-wrapper">
-            <textarea
-              value={editedText}
-              onChange={(e) => { setEditedText(e.target.value); setEditError("") }}
-              rows="3"
-            />
+            <label>
+              <textarea
+                value={editedText}
+                onChange={(e) => { setEditedText(e.target.value); setEditError("") }}
+                rows="3"
+                name="editMessage"
+                />
+              {editError &&
+                <p className="error">{editError}</p>
+              }
+            </label>
             <div className="post-length">
-              <p className="error">{editError}</p>
               <p className={`length ${editedText.length >= 140 ? "red" : ""}`}>
                 {editedText.length}/140
               </p>

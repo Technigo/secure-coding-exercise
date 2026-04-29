@@ -4,7 +4,8 @@
 }
 
 * {
-  font-family: Menlo;
+  /* font-family: Menlo; */
+  font-family: 'Courier New', Courier, monospace;
   box-sizing: border-box;
 }
 

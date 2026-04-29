@@ -26,6 +26,7 @@ export const PostMessage = ({ newMessage, fetchPosts }) => {
         method: "POST",
         body: JSON.stringify({
           message: `${newPost}`,
+          hearts: 0
         }),
         headers: { "Content-Type": "application/json" },
       }

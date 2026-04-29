@@ -2,23 +2,20 @@ import { useState } from "react"
 import { formatDistance } from "date-fns"
 
 export const SingleMessage = ({ singleMessage, fetchPosts }) => {
-  const [numLikes, setNumLikes] = useState(singleMessage.hearts) // Setting the initial state to the current number of hearts
-  const [liked, setLiked] = useState(false) // Initial state false
+  const [numLikes, setNumLikes] = useState(singleMessage.hearts)
+  const [liked, setLiked] = useState(false)
 
-  // We calculate the time since the message was posted (date-fns)
   const timeSincePosted = formatDistance(
     new Date(singleMessage.createdAt),
     new Date(),
     { addSuffix: true }
   )
 
-  // This function posts a like to the API, set the like status and updates the message list through fetchPosts
   const onLikeIncrease = () => {
     const options = {
       method: "POST",
     }
 
-    // eslint-disable-next-line no-underscore-dangle
     fetch(
       `http://localhost:3000/messages/${singleMessage._id}/like`,
       options
@@ -26,11 +23,12 @@ export const SingleMessage = ({ singleMessage, fetchPosts }) => {
       .then((response) => response.json())
       .then(() => {
         setNumLikes(numLikes + 1) // We post to the API the current number of likes + 1
-        setLiked(true) // We set the state liked to true
+        setLiked(true) // We set the state liked to true for visual reference only
         fetchPosts() // We call the fetchPost function in the grandparent, fetching from the API, rendering an update in messageList.
       })
       .catch((error) => console.log(error))
   }
+
   return (
     <div className="message">
       <p key={singleMessage._id}>{singleMessage.message}</p>

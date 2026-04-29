@@ -1,36 +1,41 @@
-import { useState } from "react";
-import { BASE_URL } from "../api";
+import { useState } from "react"
+import { BASE_URL } from "../api"
 
-function AuthModal({ mode, onClose, onSuccess }) {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState(null);
+export const AuthModal = ({ mode, onClose, onSuccess }) => {
+  const [username, setUsername] = useState("")
+  const [email, setEmail] = useState("")
+  const [login, setLogin] = useState("")
+  const [password, setPassword] = useState("")
+  const [error, setError] = useState(null)
+  const [submitting, setSubmitting] = useState(false)
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(null);
+    e.preventDefault()
+    setError(null)
+    setSubmitting(true)
 
     try {
-      const url = mode === "register" ? `${BASE_URL}/register` : `${BASE_URL}/login`;
+      const url = mode === "register" ? `${BASE_URL}/register` : `${BASE_URL}/login`
       const body = mode === "register"
         ? { username, email, password }
-        : { email, password };
+        : { login, password }
 
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
-      });
+      })
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Something went wrong");
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || "Something went wrong")
 
-      onSuccess(data);
+      onSuccess(data)
     } catch (err) {
-      setError(err.message);
+      setError(err.message)
+    } finally {
+      setSubmitting(false)
     }
-  };
+  }
 
   return (
     <div onClick={onClose}>
@@ -41,29 +46,40 @@ function AuthModal({ mode, onClose, onSuccess }) {
       >
         <h2>{mode === "register" ? "Register" : "Login"}</h2>
 
-        {mode === "register" && (
+        {mode === "register" ? (
+          <>
+            <input
+              type="text"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              minLength={2}
+              maxLength={30}
+              name="username"
+              autoComplete="username"
+            />
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              name="email"
+              autoComplete="email"
+            />
+          </>
+        ) : (
           <input
             type="text"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Username or email"
+            value={login}
+            onChange={(e) => setLogin(e.target.value)}
             required
-            minLength={2}
-            maxLength={30}
-            name="username"
+            name="login"
             autoComplete="username"
           />
         )}
-
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          name="email"
-          autoComplete="email"
-        />
 
         <input
           type="password"
@@ -86,6 +102,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
         <button
           type="submit"
           className="auth-button"
+          disabled={submitting}
         >
           {mode === "register" ? "Register" : "Login"}
         </button>
@@ -93,5 +110,3 @@ function AuthModal({ mode, onClose, onSuccess }) {
     </div>
   )
 }
-
-export default AuthModal

@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react"
 import { BASE_URL } from "../api"
 
-export const PostMessage = ({ newMessage, fetchPosts, user }) => {
-  const [newPost, setNewPost] = useState("") // Initial state is an empty string
-  const [errorMessage, setErrorMessage] = useState("") // Initial state is an empty string
+export const PostMessage = ({ newMessage, fetchPosts, user, onUnauthorized }) => {
+  const [newPost, setNewPost] = useState("")
+  const [errorMessage, setErrorMessage] = useState("")
+  const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
     if (newPost.length >= 141) {
@@ -25,25 +26,27 @@ export const PostMessage = ({ newMessage, fetchPosts, user }) => {
     } else {
       const options = {
         method: "POST",
-        body: JSON.stringify({
-          message: `${newPost}`,
-          hearts: 0
-        }),
+        body: JSON.stringify({ message: newPost }),
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${user?.response?.accessToken}`,
         },
       }
 
-      // console.log('options:', options)
+      setSubmitting(true)
       fetch(`${BASE_URL}/messages`, options)
-        .then((response) => response.json())
+        .then((response) => {
+          if (response.status === 401) { onUnauthorized(); return null }
+          return response.json()
+        })
         .then((data) => {
+          if (!data) return
           newMessage(data)
           setNewPost("")
           fetchPosts()
         })
         .catch((error) => console.log(error))
+        .finally(() => setSubmitting(false))
     }
   }
   if (!user) {
@@ -74,14 +77,11 @@ export const PostMessage = ({ newMessage, fetchPosts, user }) => {
           type="submit"
           id="submitPostBtn"
           aria-label="button for submiting your post"
+          disabled={submitting}
         >
-          <span className="emoji" aria-label="like button">
-            &#x2665;
-          </span>
+          <span className="emoji" aria-label="like button">&#x2665;</span>
           Send message
-          <span className="emoji" aria-label="like button">
-            &#x2665;
-          </span>
+          <span className="emoji" aria-label="like button">&#x2665;</span>
         </button>
       </form>
     </div>

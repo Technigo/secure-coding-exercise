@@ -31,7 +31,7 @@ const mongoUrl = process.env.MONGO_URL || "mongodb://localhost/secure-coding-exe
 mongoose.connect(mongoUrl)
 
 mongoose.connection.once("open", () => {
-  console.log("Connected to mongodb", mongoUrl)
+  console.log("Connected to MongoDB")
 })
 
 mongoose.connection.on("error", err => {
@@ -59,13 +59,14 @@ app.post("/register", authLimiter, async (req, res) => {
     }
 
     const existingUser = await User.findOne({
-      email: email.toLowerCase()
+      $or: [{ email: email.toLowerCase() }, { username: username.trim() }]
     })
 
     if (existingUser) {
+      const field = existingUser.email === email.toLowerCase() ? "email" : "username"
       return res.status(400).json({
         success: false,
-        message: "User with this email already exists"
+        message: `A user with this ${field} already exists`
       })
     }
 
@@ -76,7 +77,7 @@ app.post("/register", authLimiter, async (req, res) => {
     await user.save()
 
     const accessToken = jwt.sign(
-      { userId: user._id, email: user.email },
+      { userId: user._id, username: user.username },
       process.env.JWT_SECRET,
       { expiresIn: "2h" }
     )
@@ -85,7 +86,7 @@ app.post("/register", authLimiter, async (req, res) => {
       success: true,
       message: "User created successfully",
       response: {
-        email: user.email,
+        username: user.username,
         id: user._id,
         accessToken,
       },
@@ -102,12 +103,14 @@ app.post("/register", authLimiter, async (req, res) => {
 // login
 app.post("/login", authLimiter, async (req, res) => {
   try {
-    const { email, password } = req.body
-    const user = await User.findOne({ email: email.toLowerCase() })
+    const { login, password } = req.body
+    const user = await User.findOne({
+      $or: [{ username: login }, { email: login?.toLowerCase() }]
+    })
 
     if (user && bcrypt.compareSync(password, user.password)) {
       const accessToken = jwt.sign(
-        { userId: user._id, email: user.email },
+        { userId: user._id, username: user.username },
         process.env.JWT_SECRET,
         { expiresIn: "2h" }
       )
@@ -115,7 +118,7 @@ app.post("/login", authLimiter, async (req, res) => {
         success: true,
         message: "Logged in successfully",
         response: {
-          email: user.email,
+          username: user.username,
           id: user._id,
           accessToken,
         },
@@ -123,7 +126,7 @@ app.post("/login", authLimiter, async (req, res) => {
     } else {
       res.status(401).json({
         success: false,
-        message: "Wrong e-mail or password",
+        message: "Wrong username/email or password",
         response: null,
       })
     }
@@ -137,8 +140,12 @@ app.post("/login", authLimiter, async (req, res) => {
 })
 
 app.get('/messages', async (req, res) => {
-  const messages = await Message.find().sort({ createdAt: 'desc' }).limit(20).populate("user", "username").exec()
-  res.json(messages)
+  try {
+    const messages = await Message.find().sort({ createdAt: 'desc' }).limit(20).populate("user", "username").exec()
+    res.json(messages)
+  } catch (error) {
+    res.status(500).json({ message: "Could not fetch messages" })
+  }
 })
 
 app.post('/messages', authenticateUser, async (req, res) => {
@@ -153,7 +160,10 @@ app.post('/messages', authenticateUser, async (req, res) => {
   }
 })
 
+const isValidId = (id) => mongoose.Types.ObjectId.isValid(id)
+
 app.patch('/messages/:id/like', authenticateUser, async (req, res) => {
+  if (!isValidId(req.params.id)) return res.status(400).json({ message: "Invalid message ID" })
   try {
     const message = await Message.findById(req.params.id)
     if (!message) return res.status(404).json({ message: 'Message not found' })
@@ -173,6 +183,7 @@ app.patch('/messages/:id/like', authenticateUser, async (req, res) => {
 })
 
 app.patch("/messages/:id", authenticateUser, async (req, res) => {
+  if (!isValidId(req.params.id)) return res.status(400).json({ error: "Invalid message ID" })
   try {
     const { id } = req.params
     const { editedMessage } = req.body
@@ -188,11 +199,12 @@ app.patch("/messages/:id", authenticateUser, async (req, res) => {
     const updatedMessage = await message.populate("user", "username")
     res.json(updatedMessage)
   } catch (error) {
-    res.status(400).json({ error: error.message })
+    res.status(400).json({ error: "Could not update message" })
   }
 })
 
 app.delete("/messages/:id", authenticateUser, async (req, res) => {
+  if (!isValidId(req.params.id)) return res.status(400).json({ error: "Invalid message ID" })
   try {
     const { id } = req.params
     const message = await Message.findById(id)

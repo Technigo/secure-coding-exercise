@@ -1,6 +1,6 @@
 import { SingleMessage } from "./SingleMessage"
 
-export const MessageList = ({ messageList, fetchPosts, user }) => {
+export const MessageList = ({ messageList, fetchPosts, user, onUnauthorized, loading }) => {
 
   return (
     <div className="list-wrapper">
@@ -10,6 +10,7 @@ export const MessageList = ({ messageList, fetchPosts, user }) => {
           singleMessage={singleMessage}
           fetchPosts={fetchPosts}
           user={user}
+          onUnauthorized={onUnauthorized}
         />
       ))}
     </div>

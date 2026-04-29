@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { BASE_URL } from "./api"
 import { PostMessage } from "./components/PostMessage"
 import { MessageList } from "./components/MessageList"
-import AuthModal from "./components/AuthModal"
+import { AuthModal } from "./components/AuthModal"
 
 export const App = () => {
   // When a component's state changes, React automatically triggers a re-render of the component to reflect the updated state in the UI.
@@ -53,13 +53,19 @@ export const App = () => {
   // }
 
     const addNewPost = (newMessage) => {
-    setMessageList([newMessage, ...messageList])}
+    setMessageList([newMessage, ...messageList])
+  }
+
+  const handleUnauthorized = () => {
+    setUser(null)
+    setError("Your session has expired, please log in again")
+  }
     
   return (
     <>
         {user ? (
           <div className="user-info">
-            <span>{user.response.email}</span>
+            <span>{user.response.username}</span>
             <button
               onClick={() => setUser(null)}
               className="auth-button"
@@ -90,13 +96,15 @@ export const App = () => {
           onSuccess={(data) => { setUser(data); setModal(null); }}
         />
       )}
-      <PostMessage newMessage={addNewPost} fetchPosts={fetchPosts} user={user} />
+      {error && <p className="error">{error}</p>}
+      <PostMessage newMessage={addNewPost} fetchPosts={fetchPosts} user={user} onUnauthorized={handleUnauthorized} />
       <MessageList
         loading={loading}
         messageList={messageList}
         setMessageList={setMessageList}
         fetchPosts={fetchPosts}
         user={user}
+        onUnauthorized={handleUnauthorized}
       />
     </>
   )

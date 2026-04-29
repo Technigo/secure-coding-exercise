@@ -2,7 +2,7 @@ import { useState } from "react"
 import { BASE_URL } from "../api"
 import { formatDistance } from "date-fns"
 
-export const SingleMessage = ({ singleMessage, fetchPosts, user }) => {
+export const SingleMessage = ({ singleMessage, fetchPosts, user, onUnauthorized }) => {
   const [numLikes, setNumLikes] = useState(singleMessage.hearts)
   const [liked, setLiked] = useState(
     user ? singleMessage.likedBy?.includes(user.response.id) : false
@@ -35,8 +35,12 @@ export const SingleMessage = ({ singleMessage, fetchPosts, user }) => {
       `${BASE_URL}/messages/${singleMessage._id}/like`,
       options
     )
-      .then((response) => response.json())
+      .then((response) => {
+        if (response.status === 401) { onUnauthorized(); return null }
+        return response.json()
+      })
       .then((data) => {
+        if (!data) return
         setNumLikes(data.hearts)
         setLiked(!liked)
         fetchPosts()
@@ -62,8 +66,12 @@ export const SingleMessage = ({ singleMessage, fetchPosts, user }) => {
       },
       body: JSON.stringify({ editedMessage: editedText }),
     })
-      .then((response) => response.json())
-      .then(() => {
+      .then((response) => {
+        if (response.status === 401) { onUnauthorized(); return null }
+        return response.json()
+      })
+      .then((data) => {
+        if (!data) return
         setIsEditing(false)
         fetchPosts()
       })
@@ -77,7 +85,10 @@ export const SingleMessage = ({ singleMessage, fetchPosts, user }) => {
         Authorization: `Bearer ${user.response.accessToken}`,
       },
     })
-      .then(() => fetchPosts())
+      .then((response) => {
+        if (response.status === 401) { onUnauthorized(); return }
+        fetchPosts()
+      })
       .catch((error) => console.log(error))
   }
 

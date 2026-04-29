@@ -45,7 +45,11 @@ app.get('/', async (req, res) => {
 // register
 app.post("/register", authLimiter, async (req, res) => {
   try {
-    const { email, password } = req.body
+    const { email, password, username } = req.body
+
+    if (!username || username.trim().length < 2) {
+      return res.status(400).json({ success: false, message: "Username must be at least 2 characters" })
+    }
 
     if (!password || password.length < 8) {
       return res.status(400).json({ success: false, message: "Password must be at least 8 characters" })
@@ -67,7 +71,7 @@ app.post("/register", authLimiter, async (req, res) => {
 
     const salt = bcrypt.genSaltSync()
     const hashedPassword = bcrypt.hashSync(password, salt)
-    const user = new User({ email, password: hashedPassword })
+    const user = new User({ username: username.trim(), email, password: hashedPassword })
 
     await user.save()
 
@@ -133,7 +137,7 @@ app.post("/login", authLimiter, async (req, res) => {
 })
 
 app.get('/messages', async (req, res) => {
-  const messages = await Message.find().sort({ createdAt: 'desc' }).limit(20).populate("user", "email").exec()
+  const messages = await Message.find().sort({ createdAt: 'desc' }).limit(20).populate("user", "username").exec()
   res.json(messages)
 })
 
@@ -181,7 +185,7 @@ app.patch("/messages/:id", authenticateUser, async (req, res) => {
     }
     message.message = editedMessage
     await message.save()
-    const updatedMessage = await message.populate("user", "email")
+    const updatedMessage = await message.populate("user", "username")
     res.json(updatedMessage)
   } catch (error) {
     res.status(400).json({ error: error.message })

@@ -137,7 +137,7 @@ export const SingleMessage = ({ singleMessage, fetchPosts, user }) => {
           <span className="num-likes">x{singleMessage.hearts}</span>
         </div>
         <div className="info-time">
-          {singleMessage.user?.email}
+          {singleMessage.user?.username}
           <br />
           {timeSincePosted}
         </div>

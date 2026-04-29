@@ -2,6 +2,7 @@ import { useState } from "react";
 import { BASE_URL } from "../api";
 
 function AuthModal({ mode, onClose, onSuccess }) {
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
@@ -13,7 +14,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
     try {
       const url = mode === "register" ? `${BASE_URL}/register` : `${BASE_URL}/login`;
       const body = mode === "register"
-        ? { email, password }
+        ? { username, email, password }
         : { email, password };
 
       const res = await fetch(url, {
@@ -39,6 +40,20 @@ function AuthModal({ mode, onClose, onSuccess }) {
         className="modal"
       >
         <h2>{mode === "register" ? "Register" : "Login"}</h2>
+
+        {mode === "register" && (
+          <input
+            type="text"
+            placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+            minLength={2}
+            maxLength={30}
+            name="username"
+            autoComplete="username"
+          />
+        )}
 
         <input
           type="email"

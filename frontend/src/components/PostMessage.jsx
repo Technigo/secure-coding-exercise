@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 
-export const PostMessage = ({ newMessage, fetchPosts }) => {
+export const PostMessage = ({ newMessage, fetchPosts, user }) => {
   const [newPost, setNewPost] = useState("") // Initial state is an empty string
   const [errorMessage, setErrorMessage] = useState("") // Initial state is an empty string
 
@@ -28,7 +28,10 @@ export const PostMessage = ({ newMessage, fetchPosts }) => {
           message: `${newPost}`,
           hearts: 0
         }),
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user?.response?.accessToken}`,
+        },
       }
 
       // console.log('options:', options)
@@ -42,13 +45,21 @@ export const PostMessage = ({ newMessage, fetchPosts }) => {
         .catch((error) => console.log(error))
     }
   }
+  if (!user) {
+    return (
+      <div>
+        <p>Log in to write a message</p>
+      </div>
+    )
+  }
+  
   return (
     <div className="post-wrapper">
       <p>What's making you happy right now?</p>
       <form onSubmit={handleFormSubmit}>
         <textarea
           rows="3"
-          placeholder="Write your happy thought here..."
+          placeholder="Write your message here..."
           value={newPost}
           onChange={(e) => setNewPost(e.target.value)}
         />

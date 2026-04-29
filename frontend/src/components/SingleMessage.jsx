@@ -1,9 +1,14 @@
 import { useState } from "react"
 import { formatDistance } from "date-fns"
 
-export const SingleMessage = ({ singleMessage, fetchPosts }) => {
+export const SingleMessage = ({ singleMessage, fetchPosts, user }) => {
   const [numLikes, setNumLikes] = useState(singleMessage.hearts)
   const [liked, setLiked] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [editedText, setEditedText] = useState(singleMessage.message)
+  const [editError, setEditError] = useState("")
+
+  const isOwner = user && user.response.id === singleMessage.user?._id
 
   const timeSincePosted = formatDistance(
     new Date(singleMessage.createdAt),
@@ -12,8 +17,15 @@ export const SingleMessage = ({ singleMessage, fetchPosts }) => {
   )
 
   const onLikeIncrease = () => {
+    if (!user) {
+      alert("You need to be logged in to like a message")
+      return
+    }
     const options = {
-      method: "POST",
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${user?.response?.accessToken}`,
+      },
     }
 
     fetch(
@@ -22,16 +34,86 @@ export const SingleMessage = ({ singleMessage, fetchPosts }) => {
     )
       .then((response) => response.json())
       .then(() => {
-        setNumLikes(numLikes + 1) // We post to the API the current number of likes + 1
-        setLiked(true) // We set the state liked to true for visual reference only
-        fetchPosts() // We call the fetchPost function in the grandparent, fetching from the API, rendering an update in messageList.
+        setNumLikes(numLikes + 1)
+        setLiked(true)
+        fetchPosts()
       })
+      .catch((error) => console.log(error))
+  }
+
+  const onEdit = () => {
+    if (editedText.length < 5) {
+      setEditError("Message is too short (min 5 characters)")
+      return
+    }
+    if (editedText.length > 140) {
+      setEditError("Message is too long (max 140 characters)")
+      return
+    }
+    setEditError("")
+    fetch(`http://localhost:3000/messages/${singleMessage._id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${user.response.accessToken}`,
+      },
+      body: JSON.stringify({ editedMessage: editedText }),
+    })
+      .then((response) => response.json())
+      .then(() => {
+        setIsEditing(false)
+        fetchPosts()
+      })
+      .catch((error) => console.log(error))
+  }
+
+  const onDelete = () => {
+    fetch(`http://localhost:3000/messages/${singleMessage._id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${user.response.accessToken}`,
+      },
+    })
+      .then(() => fetchPosts())
       .catch((error) => console.log(error))
   }
 
   return (
     <div className="message">
-      <p key={singleMessage._id}>{singleMessage.message}</p>
+      <div className="message-header">
+        {isEditing ? (
+          <div className="edit-wrapper">
+            <textarea
+              value={editedText}
+              onChange={(e) => { setEditedText(e.target.value); setEditError("") }}
+              rows="3"
+            />
+            <div className="post-length">
+              <p className="error">{editError}</p>
+              <p className={`length ${editedText.length >= 140 ? "red" : ""}`}>
+                {editedText.length}/140
+              </p>
+            </div>
+          </div>
+        ) : (
+          <p>{singleMessage.message}</p>
+        )}
+        {isOwner && (
+          <div className="message-actions">
+            {isEditing ? (
+              <>
+                <button type="button" onClick={onEdit}>💾</button>
+                <button type="button" onClick={() => setIsEditing(false)}>❌</button>
+              </>
+            ) : (
+              <>
+                <button type="button" onClick={() => setIsEditing(true)}>✏️</button>
+                <button type="button" onClick={onDelete}>🗑️</button>
+              </>
+            )}
+          </div>
+        )}
+      </div>
       <div className="info-wrapper">
         <div className="info-like">
           <button
@@ -46,7 +128,11 @@ export const SingleMessage = ({ singleMessage, fetchPosts }) => {
           </button>
           <span className="num-likes">x{singleMessage.hearts}</span>
         </div>
-        <div className="info-time">{timeSincePosted}</div>
+        <div className="info-time">
+          {singleMessage.user?.email}
+          <br />
+          {timeSincePosted}
+        </div>
       </div>
     </div>
   )

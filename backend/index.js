@@ -102,12 +102,12 @@ app.post("/login", async (req, res) => {
 })
 
 app.get('/messages', async (req, res) => {
-  const messages = await Message.find().sort({ createdAt: 'desc' }).limit(20).exec()
+  const messages = await Message.find().sort({ createdAt: 'desc' }).limit(20).populate("user", "email").exec()
   res.json(messages)
 })
 
-app.post('/messages', async (req, res) => {
-  const message = new Message(req.body)
+app.post('/messages', authenticateUser, async (req, res) => {
+  const message = new Message({ ...req.body, user: req.user._id })
 
   try {
     const saved = await message.save()
@@ -117,7 +117,7 @@ app.post('/messages', async (req, res) => {
   }
 })
 
-app.post('/messages/:id/like', async (req, res) => {
+app.patch('/messages/:id/like', authenticateUser, async (req, res) => {
   try {
     const message = await Message.findOneAndUpdate({ _id: req.params.id }, { $inc: { hearts: 1 } }, { new: true })
     res.json(message)

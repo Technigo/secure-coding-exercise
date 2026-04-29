@@ -1,6 +1,6 @@
 import { SingleMessage } from "./SingleMessage"
 
-export const MessageList = ({ messageList, fetchPosts }) => {
+export const MessageList = ({ messageList, fetchPosts, user }) => {
 
   return (
     <div className="list-wrapper">
@@ -9,6 +9,7 @@ export const MessageList = ({ messageList, fetchPosts }) => {
           key={singleMessage._id}
           singleMessage={singleMessage}
           fetchPosts={fetchPosts}
+          user={user}
         />
       ))}
     </div>

@@ -13,7 +13,9 @@ function AuthModal({ mode, onClose, onSuccess }) {
 
     try {
       const url = mode === "register" ? `${BASE_URL}/register` : `${BASE_URL}/login`;
-      const body = { email, password }
+      const body = mode === "register"
+        ? { email, password }
+        : { email, password };
 
       const res = await fetch(url, {
         method: "POST",
@@ -32,13 +34,13 @@ function AuthModal({ mode, onClose, onSuccess }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+    <div onClick={onClose}>
       <form
         onClick={(e) => e.stopPropagation()}
         onSubmit={handleSubmit}
-        className="w-full max-w-xs border border-gray-200 bg-gray-100 p-5 shadow-[6px_6px_0_#000] space-y-3"
+        className="modal"
       >
-        <h2 className="text-lg font-bold">{mode === "register" ? "Register" : "Login"}</h2>
+        <h2>{mode === "register" ? "Register" : "Login"}</h2>
 
         <input
           type="email"
@@ -46,7 +48,6 @@ function AuthModal({ mode, onClose, onSuccess }) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full border border-gray-300 p-2 text-sm outline-none focus:border-red-400"
         />
 
         <input
@@ -56,14 +57,13 @@ function AuthModal({ mode, onClose, onSuccess }) {
           onChange={(e) => setPassword(e.target.value)}
           required
           minLength={6}
-          className="w-full border border-gray-300 p-2 text-sm outline-none focus:border-red-400"
         />
 
-        {error && <p className="text-xs text-red-500">{error}</p>}
+        {error && <p className="error">{error}</p>}
 
         <button
           type="submit"
-          className="w-full rounded-full bg-gradient-to-b from-red-300 to-red-500 py-2 text-sm font-semibold text-white shadow-md hover:brightness-110"
+          className="auth-button"
         >
           {mode === "register" ? "Register" : "Login"}
         </button>

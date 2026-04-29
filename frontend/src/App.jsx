@@ -56,33 +56,34 @@ export const App = () => {
 
     const addNewPost = (newMessage) => {
     setMessageList([newMessage, ...messageList])}
+    
   return (
     <>
         {user ? (
-          <>
-            <span className="text-sm text-gray-600">Hi, {user.response.email}</span>
+          <div className="user-info">
+            <span>{user.response.email}</span>
             <button
               onClick={() => { localStorage.removeItem("user"); setUser(null); }}
-              className="rounded-full border border-gray-300 px-3 py-1 text-xs font-semibold hover:bg-gray-100"
+              className="auth-button"
             >
               Logout
             </button>
-          </>
+          </div>
         ) : (
-          <>
+          <div className="auth-buttons">
             <button
               onClick={() => setModal("login")}
-              className="rounded-full border border-gray-300 px-3 py-1 text-xs font-semibold hover:bg-gray-100"
+              className="auth-button"
             >
               Login
             </button>
             <button
               onClick={() => setModal("register")}
-              className="rounded-full bg-gradient-to-b from-red-300 to-red-500 px-3 py-1 text-xs font-semibold text-white hover:brightness-110"
+              className="auth-button"
             >
               Register
             </button>
-          </>
+          </div>
         )}
       {modal && (
         <AuthModal
@@ -91,12 +92,13 @@ export const App = () => {
           onSuccess={(data) => { setUser(data); setModal(null); }}
         />
       )}
-      <PostMessage newMessage={addNewPost} fetchPosts={fetchPosts} />
+      <PostMessage newMessage={addNewPost} fetchPosts={fetchPosts} user={user} />
       <MessageList
         loading={loading}
         messageList={messageList}
         setMessageList={setMessageList}
         fetchPosts={fetchPosts}
+        user={user}
       />
     </>
   )

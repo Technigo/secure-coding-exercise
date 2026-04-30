@@ -16,8 +16,6 @@ export const App = () => {
   // When fetchPosts sets the loading or messageList state, it triggers a re-render of the App component.
   // We call the messages in the API, by GET method:
   const fetchPosts = () => {
-    // console.log(loading)
-    // console.log(messageList)
     setLoading(true)
     fetch(`${BASE_URL}/messages`)
       .then((res) => res.json())
@@ -29,28 +27,7 @@ export const App = () => {
   // The useEffect hook is used to call the fetchPosts function and update the messageList state with the data retrieved from the API.
   useEffect(() => {
     fetchPosts()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
-  // This updates the message list, adding the new submitted message
-  // const addNewPost = async (newMessage) => {
-  //   setError(null)
-
-  //   if (!user) {
-  //     setError("Please log in to post a thought.");
-  //     return { ok: false };
-  //   }
-
-  //   const message = await postMessage(newMessage);
-
-  //   if (message.message && !message.error && !message.errors) {
-  //     setMessageList((prev) => [message, ...prev]);
-  //     return { ok: true };
-  //   } else {
-  //     setError("Your message must be 5–140 characters.");
-  //     return { ok: false }
-  //   }
-  // }
 
     const addNewPost = (newMessage) => {
     setMessageList([newMessage, ...messageList])

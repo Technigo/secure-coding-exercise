@@ -1,0 +1,290 @@
+@font-face {
+  font-family: Menlo;
+  src: url(./Menlo-Regular.ttf);
+}
+
+* {
+  /* font-family: Menlo; */
+  font-family: 'Courier New', Courier, monospace;
+  box-sizing: border-box;
+}
+
+/* ---- CSS Reset ---- */
+body {
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  display: flex;
+  justify-content: center;
+}
+
+.emoji {
+  font-size: 24px;
+  color: rgb(187, 0, 0);
+}
+
+button .emoji {
+  margin: 0 6px;
+}
+
+p {
+  word-break: break-all;
+  white-space: normal;
+}
+
+a {
+  text-decoration: none;
+  color: black;
+}
+
+/* ---- Spinner ---- */
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #cacaca;
+  border-top-color: rgb(187, 0, 0);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin: 20px auto;
+}
+
+/* ---- Post New Message */
+
+.post-wrapper {
+  border: 2px solid #7E7E7E;
+  border-radius: 1px;
+  background-color: #ebebeb;
+  margin: 10px 0 30px 0;
+  padding: 15px;
+  box-shadow: 7px 7px;
+}
+
+.post-wrapper form {
+  width: 100%;
+}
+
+.post-wrapper textarea {
+  width: 100%;
+  height: 70px;
+  border: 2px solid #cacaca;
+  border-radius: 1px;
+  text-align: start;
+  font-size: 16px;
+  resize: none;
+  margin: 0 0 15px 0;
+  padding: 7px 9px;
+}
+
+.post-length {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 15px 0;
+  padding: 0;
+  gap: 5px;
+}
+
+.length {
+  color: grey;
+  margin: 0;
+  min-width: 50px;
+  font-size: 12px;
+}
+
+.message .length {
+  font-size: 12px;
+}
+
+.error {
+  font-size: 16px;
+  color: rgb(187, 0, 0);
+  margin: 0;
+}
+
+.post-wrapper button {
+  display: flex;
+  align-items: center;
+  background-color: #F2ACAD;
+  height: 35px;
+  border-radius: 25px;
+  font-size: 12px;
+  border: 0;
+  cursor: pointer;
+}
+
+input::placeholder, textarea::placeholder {
+  font-size: 11px;
+  color: lightgrey;
+  padding: 2px;
+}
+
+.post-wrapper button:hover {
+  background-color: #f37d7f;
+}
+
+/* Single message */
+
+.message-header {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.message-header p {
+  flex: 1;
+  margin: 0 0 15px 0;
+}
+
+.message-header textarea {
+  flex: 1;
+  border: 2px solid #cacaca;
+  font-size: 16px;
+  resize: none;
+  padding: 7px 9px;
+  margin-bottom: 15px;
+}
+
+.edit-wrapper {
+  display: flex;
+  gap: 5px;
+}
+
+.message-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.message-actions button {
+  /* background-color: #ebebeb;
+  border: 1px solid #cacaca; */
+  /* border-radius: 2px; */
+  border: none;
+  font-size: 11px;
+  padding: 3px 8px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.message-actions button:hover {
+  background-color: #f37d7f;
+}
+
+.message {
+  border: 2px solid #7E7E7E;
+  border-radius: 1px;
+  width: 400px;
+  max-width: 400px;
+  margin-bottom: 30px;
+  padding: 15px;
+  box-shadow: 7px 7px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.message p {
+  font-size: 16px;
+  margin-bottom: 15px;
+  word-wrap: break-word;
+  line-height: 1.4;
+}
+
+.info-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px;
+  color: #CACACA;
+  font-size: 12px;
+  text-align: right;
+}
+
+.like-button {
+  color: #8F8D8D;
+  font-size: 12px;
+  font-weight: bold;
+
+  font-family: 'Inconsolata', monospace;
+  background-color: #eaeaea;
+  border: 0px;
+  width: 37px;
+  height: 37px;
+  border-radius: 50%;
+  font-size: 16.5px;
+  margin-right: 5px;
+  cursor: pointer;
+}
+
+.like-button:hover {
+  background-color: #f37d7f;
+}
+
+.num-likes {
+  margin-left: 5px;
+}
+
+.info-time {
+  color: grey;
+}
+
+/* To add when user has liked a post */
+.liked {
+  background-color: #F2ACAD;
+}
+
+/* To add when the post has too many characters */
+.red {
+  color: rgb(187, 0, 0);
+}
+
+.auth-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 5px;
+}
+
+.auth-button {
+  border: 0;
+  border-radius: 2px;
+  margin-top: 5px;
+  padding: 5px 15px;
+  font-size: 12px;
+  background-color: #ebebeb;
+  cursor: pointer;
+}
+
+.auth-button:hover {
+  background-color: #f37d7f;
+}
+
+.modal {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
+input {
+  height: 30px;
+  margin-bottom: 5px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 5px;
+}
+
+h2 {
+  font-size: 18px;
+  margin: 0 0 5px 0;
+}
